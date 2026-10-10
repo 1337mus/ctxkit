@@ -22,35 +22,20 @@ That creates your knowledge base at `~/.agent-context` and prints a short snippe
 
 ```mermaid
 flowchart LR
-    subgraph Agents
-        CC["Claude Code"]
-        CX["Codex"]
-    end
+    A["🤖 Your agents<br/>Claude Code, Codex"]
+    KB[("📁 Knowledge base<br/>markdown files in git")]
+    H["🔔 Stop hook<br/>asks for notes after real work"]
+    D["🩺 Doctor<br/>finds broken links, lost notes, bloat"]
+    S["💾 Snapshot<br/>commits every hour"]
+    M["📊 Stats, recall, digest<br/>is it working?"]
 
-    subgraph KB["Your knowledge base (markdown + git)"]
-        IDX["README.md<br/>the index"]
-        NOTES["Topic notes"]
-        RULES["Standing rules"]
-    end
-
-    subgraph ctx["ctxkit"]
-        HOOK["Stop hook<br/>asks agents to write notes"]
-        DOC["Doctor<br/>checks nothing is broken or lost"]
-        SNAP["Snapshot<br/>commits every hour"]
-        STATS["Stats + Recall<br/>is it being used? can agents find things?"]
-        DIG["Weekly digest"]
-    end
-
-    CC -- "1. read" --> IDX
-    CX -- "1. read" --> IDX
-    IDX --> NOTES
-    CC -- "2. finish a turn" --> HOOK
-    CX -- "2. finish a turn" --> HOOK
-    HOOK -- "3. write it down" --> NOTES
-    DOC --> KB
-    SNAP --> KB
-    STATS -. "reads session logs" .-> Agents
-    STATS --> DIG
+    A -->|"① read"| KB
+    A -->|"② turn ends"| H
+    H -->|"③ write it down"| A
+    A -->|"④ save notes"| KB
+    D --> KB
+    S --> KB
+    M -.->|"reads session logs"| A
 ```
 
 There are three parts:
