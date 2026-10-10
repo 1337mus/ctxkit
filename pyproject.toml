@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ctxkit"
+version = "0.1.0"
+description = "Audit, measure and gently nudge a markdown knowledge base that coding agents pull from."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+keywords = ["agents", "context", "knowledge-base", "markdown", "claude-code", "codex"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+]
+
+[project.scripts]
+ctx = "ctxkit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
