@@ -106,7 +106,7 @@ class LossTest(support.WorkspaceCase):
     def test_a_missing_repo_or_baseline_is_stated_not_silently_treated_as_clean(self):
         """Regression: with no git history the check cannot work, and saying nothing looks like a clean bill of health."""
         import shutil
-        shutil.rmtree(self.root / ".git")
+        shutil.rmtree(self.root / ".git", onerror=lambda f, path, exc: None if issubclass(exc[0], FileNotFoundError) else (_ for _ in ()).throw(exc[1]))
         report = check_loss(self.corpus)
         self.assertEqual(report.lost, [])
         self.assertIn("not a git repository", report.skipped)

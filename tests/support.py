@@ -130,6 +130,10 @@ class WorkspaceCase(unittest.TestCase):
         git(self.root, "config", "user.name", "ctxkit-tests")
         git(self.root, "config", "user.email", "tests@localhost")
         git(self.root, "config", "commit.gpgsign", "false")
+        # Background `git maintenance` can create .git/maintenance.lock mid-test,
+        # which raced a test deleting .git on CI. No auto housekeeping in fixtures.
+        git(self.root, "config", "maintenance.auto", "false")
+        git(self.root, "config", "gc.auto", "0")
         git(self.root, "add", "-A")
         git(self.root, "commit", "-q", "-m", "baseline corpus")
 
