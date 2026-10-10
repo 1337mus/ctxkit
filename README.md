@@ -156,4 +156,4 @@ You mostly need the first two.
 
 Python 3.11 or newer and git. Runs on macOS and Linux. Works with Claude Code and Codex.
 
-**License:** to be decided before public release.
+**License:** [MIT](LICENSE)
