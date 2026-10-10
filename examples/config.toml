@@ -1,0 +1,180 @@
+# ctxkit example configuration.
+#
+# Every key is shown with its default value, so using this file unchanged behaves
+# like having no config at all. The one exception is [recall] agent_command, which
+# has no default because it names an external program.
+#
+# Save it as ~/.config/ctxkit/config.toml, or point at it with --config PATH or
+# $CTXKIT_CONFIG. Paths may start with ~. Lookup order: --config, $CTXKIT_CONFIG,
+# ~/.config/ctxkit/config.toml, built-in defaults.
+
+# ---- where things live -------------------------------------------------------
+
+# The knowledge base: a folder of markdown files whose README.md is the entry point.
+# Default ~/.agent-context. A hidden folder in your home belongs to no single project,
+# so every agent on the machine can read the same corpus. If it is a git repository it
+# must be the repository root, because the loss checks compare against git HEAD.
+root = "~/.agent-context"
+
+# Where ctxkit keeps its own bookkeeping: the compliance trend, the fat-file history,
+# hook markers, recall sets and runs, and digests. Default ~/.local/state/ctxkit.
+# State is kept out of the corpus so that agents never see it and snapshots never commit it.
+state_dir = "~/.local/state/ctxkit"
+
+# ---- corpus structure --------------------------------------------------------
+
+# Short standing rules that apply to every project. The first entry is the promotion
+# target named in the hook's stop message and in `ctx distill`. Later entries are
+# companion files, the place to split to when the first one grows unwieldy.
+# Default ["standing-rules.md"]. Paths are relative to root.
+standing_files = ["standing-rules.md"]
+
+# Name of the folder, at any depth, that holds finished work. Archived files stay
+# reachable and searchable but are exempt from size, expiry and dead-weight checks and
+# are never quizzed by recall. Default "archive". Moving a file there is a judgement call
+# for a reader, not something a script should sweep.
+archive_dirname = "archive"
+
+# Folders, at any depth, whose files are not agent context (personal records, say).
+# They still take part in integrity checks, but are left out of dead-weight reports and
+# recall sampling, where "never read" is the expected state. Default ["personal"].
+excluded_dirs = ["personal"]
+
+# ---- identifiers and rules ---------------------------------------------------
+
+# Regular expressions for identifiers whose disappearance means content was lost.
+# An identifier either exists or it does not, which is why loss detection keys on them
+# instead of prose. The default matches ticket keys such as SHOP-123. Add patterns for
+# anything else you cannot afford to lose, for example build-[0-9a-f]{7}.
+identifier_patterns = ['\b[A-Z][A-Z0-9]{1,9}-\d+\b']
+
+# Strings that match the pattern but are not identifiers. Exact matches only.
+identifier_ignore = [
+  "UTF-8", "UTF-16", "UTF-32",
+  "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512",
+  "ISO-8601", "ISO-8859",
+  "AES-128", "AES-256", "RSA-2048", "RSA-4096",
+  "HTTP-2", "HTTP-3", "COVID-19",
+]
+
+# What a distilled rule looks like: a bullet or numbered item opening with a bolded lead
+# of at least twelve characters. Group 1 is the lead. Rules usually carry no identifier,
+# so the lead is the only handle for noticing that one was deleted or hollowed out.
+rule_lead_pattern = '^(?:[-*]|\d+[a-z]?\.)\s+\*\*(.{12,}?)\*\*'
+
+# ---- thresholds --------------------------------------------------------------
+
+# A file over this many bytes is a candidate for splitting. Advisory the first time.
+# README files and archived files are exempt. Default 40000.
+fat_file_bytes = 40000
+
+# A file that was split, shrank, and grew past the limit again fails the check, but only
+# after it has gone this many days without a write. A busy file is large because the work
+# is active, and forcing a split then is churn. Default 7.
+regrown_dormant_days = 7
+
+# The stop hook asks for a capture after this many edits outside the corpus that have not
+# been recorded yet. Default 8.
+nudge_min_edits = 8
+
+# ...or after this many unrecorded git and gh write actions (commit, push, merge, pull
+# request changes). Review and merge sessions make many of these and few edits. Default 5.
+nudge_min_milestones = 5
+
+# The root README is read by most sessions, so its size is a tax on all of them. Past this
+# many estimated tokens (bytes divided by four) `ctx doctor` fails. Default 10000.
+index_token_flag = 10000
+
+# One root index entry (a top-level bullet and its continuation lines) may be this many
+# bytes. The root routes, it does not explain. Default 1500.
+index_entry_max_bytes = 1500
+
+# A file must be at least this many days old before dead-weight reporting counts it as
+# unread. A new file has had no fair chance to be read. Default 7.
+dead_weight_min_age_days = 7
+
+# A session is substantial, and counted in compliance, at this many assistant turns or more.
+# Short exchanges are not expected to consult the corpus. Default 20.
+substantial_min_turns = 20
+
+# The window, in days, whose compliance is written to the daily trend. Other windows can be
+# printed but never recorded, so ad hoc runs cannot distort the series. Default 30.
+trend_window_days = 30
+
+# ---- transcript sources ------------------------------------------------------
+
+# Where session transcripts live. Each source can be switched off. Transcripts are only
+# ever read, never changed. Other tools are not instrumented.
+
+# Claude Code sessions.
+[sources.claude]
+# Read this source. Default true.
+enabled = true
+# One JSON lines file per session. Default "~/.claude/projects/*/*.jsonl".
+glob = "~/.claude/projects/*/*.jsonl"
+
+# Codex sessions (rollout files).
+[sources.codex]
+# Read this source. Default true.
+enabled = true
+# Default "~/.codex/sessions/*/*/*/rollout-*.jsonl".
+glob = "~/.codex/sessions/*/*/*/rollout-*.jsonl"
+
+# ---- snapshot ----------------------------------------------------------------
+
+[snapshot]
+# Whether `ctx snapshot` (and the scheduled snapshot job) does anything. Default true.
+enabled = true
+# Sign snapshot commits. Default false, because an unattended job cannot answer a
+# graphical passphrase prompt and would hang instead of committing.
+sign = false
+
+# ---- digest ------------------------------------------------------------------
+
+[digest]
+# Where digests are written, one file per day plus latest.md.
+# Default: the digest folder inside state_dir.
+dir = "~/.local/state/ctxkit/digest"
+# Optional command run by `ctx digest --notify`, as a list of arguments. {path} is replaced
+# with the digest file and {summary} with a one-line summary. Default [] (no notification).
+# macOS example:
+#   notify_command = ["osascript", "-e", "display notification \"{summary}\" with title \"ctx digest\""]
+# Linux example:
+#   notify_command = ["notify-send", "ctx digest", "{summary}"]
+notify_command = []
+
+# ---- hook --------------------------------------------------------------------
+
+[hook]
+# The text the stop hook gives an agent when work has gone unrecorded. {root} becomes the
+# corpus path and {standing_file} the absolute path of the first standing file.
+stop_message = """\
+This session changed code or repository state but did not update the context corpus at {root}. \
+Before stopping, record durable context there: decisions, outcomes, gotchas and follow-up risks. \
+Prefer updating an existing file over creating a new one. \
+Then ask whether anything here is a lesson that would apply on a different project. \
+If so, promote it to {standing_file} as one short imperative rule, and strengthen an existing rule \
+instead of appending a near duplicate. \
+Finally run `ctx doctor` and fix anything it reports. \
+If there is genuinely nothing durable to record, say so in one line and stop."""
+
+# ---- recall ------------------------------------------------------------------
+
+[recall]
+# The command that runs one question. An argument list, never a shell string, and at least
+# one element must contain {prompt}. It runs with the corpus root as its working directory.
+# It must be READ-ONLY: ctx warns if the corpus changes during a run, but it cannot stop a
+# write-capable agent. There is no default.
+#
+# Claude Code, restricted to read-only tools:
+agent_command = ["claude", "-p", "--output-format", "json", "--model", "sonnet", "--allowedTools", "Read Grep Glob", "{prompt}"]
+#
+# Codex, in its read-only sandbox (use this instead of the line above):
+#   agent_command = ["codex", "exec", "--sandbox", "read-only", "{prompt}"]
+
+# Facts per question set. Default 20.
+n = 20
+# Sampling seed. The same seed and corpus always give the same set. Default 1.
+seed = 1
+# Seconds before one question is abandoned and counted as failed. Default 300.
+timeout_seconds = 300
