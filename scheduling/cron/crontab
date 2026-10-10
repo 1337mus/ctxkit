@@ -1,0 +1,7 @@
+# ctxkit recurring jobs. Edit with: crontab -e
+# Create the log folder once: mkdir -p /home/you/.local/state/ctxkit/logs
+PATH=/usr/local/bin:/usr/bin:/bin
+HOME=/home/you
+5 9 * * * /usr/local/bin/ctx --config /home/you/.config/ctxkit/config.toml stats >> /home/you/.local/state/ctxkit/logs/stats.log 2>&1
+17 * * * * /usr/local/bin/ctx --config /home/you/.config/ctxkit/config.toml snapshot >> /home/you/.local/state/ctxkit/logs/snapshot.log 2>&1
+15 9 * * 1 /usr/local/bin/ctx --config /home/you/.config/ctxkit/config.toml digest >> /home/you/.local/state/ctxkit/logs/digest.log 2>&1
