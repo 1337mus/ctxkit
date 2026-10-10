@@ -57,6 +57,7 @@ def build_parser() -> argparse.ArgumentParser:
         _add_config(p)
         return p
 
+    command("init", "create a starter knowledge base and print the agent snippet (never overwrites)")
     command("doctor", "check corpus integrity: reachability, indexes, dates, content loss, size limits (exit 1 on failure)")
 
     p = command("stats", "pull compliance, top-read files, dead weight and index routing from agent transcripts")
@@ -139,6 +140,9 @@ def _dispatch(args: argparse.Namespace) -> int:
     if cfg is None:
         return 2
 
+    if args.command == "init":
+        from . import init
+        return init.run(cfg)
     if args.command == "doctor":
         from . import doctor
         return doctor.run(cfg)

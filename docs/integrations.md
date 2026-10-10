@@ -89,7 +89,7 @@ Whether an interactive Codex session acts on the block and performs the capture 
 
 ## Instruction files
 
-The pull convention belongs in whichever file your agent reads at the start of a session: `AGENTS.md`, `CLAUDE.md`, or a global equivalent. A snippet is in the [README](../README.md#the-pull-convention). Keep it short and point at the corpus root. Anything longer starts to be a second copy of the corpus.
+The pull convention belongs in whichever file your agent reads at the start of a session: `AGENTS.md`, `CLAUDE.md`, or a global equivalent. A snippet is in the [reference](reference.md#the-pull-convention), and `ctx init` prints it. Keep it short and point at the corpus root. Anything longer starts to be a second copy of the corpus.
 
 ## Running recall against an agent
 
