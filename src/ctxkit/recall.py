@@ -44,6 +44,8 @@ from .config import Config, ensure_state_dir
 from .corpus import Corpus
 
 MAX_CUE_WORDS = 6
+# An identifier found in more files than this is vocabulary, not a fact.
+MAX_IDENTIFIER_FILES = 3
 MIN_WORD_LENGTH = 3
 SET_VERSION = 1
 
@@ -214,10 +216,30 @@ def sample_key(seed: int, fact: Fact) -> str:
     return hashlib.sha256(f"{seed}\0{fact.path}\0{fact.identifier}\0{fact.text}".encode()).hexdigest()
 
 
+def specific_facts(corpus: Corpus, facts: list[Fact]) -> list[Fact]:
+    """Keep facts whose identifier is SPECIFIC: in few files, one item per identifier.
+
+    A token that matches the identifier pattern but appears across many files is
+    vocabulary, not a fact. Against a real corpus the generic pattern sampled
+    a model name four times out of twelve, plus a film rating, and none of those
+    test recall. The file cap removes them; the dedupe stops one identifier from
+    dominating a set."""
+    spread: Counter[str] = Counter()
+    for path in corpus.files():
+        spread.update(set(corpus.cfg.identifiers(corpus.text(path))))
+    kept, seen = [], set()
+    for fact in facts:
+        if spread[fact.identifier] > MAX_IDENTIFIER_FILES or fact.identifier in seen:
+            continue
+        seen.add(fact.identifier)
+        kept.append(fact)
+    return kept
+
+
 def build_set(cfg: Config, n: int, seed: int, now: float | None = None) -> QuestionSet:
     """Sample ``n`` facts deterministically and judge each one."""
     corpus = Corpus(cfg)
-    facts = sorted(iter_facts(corpus), key=lambda f: sample_key(seed, f))
+    facts = specific_facts(corpus, sorted(iter_facts(corpus), key=lambda f: sample_key(seed, f)))
     df = document_frequency(corpus)
     index = LineIndex(corpus)
     items = []

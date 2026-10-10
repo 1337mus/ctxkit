@@ -58,11 +58,13 @@ class ExampleConfigTest(support.WorkspaceCase):
 
     def test_example_shows_a_read_only_command_for_claude_and_for_codex(self):
         command = self.example.recall_agent_command
-        self.assertEqual(command[:3], ["claude", "-p", "--output-format"])
+        # Regression: with {prompt} last, claude's variadic --allowedTools swallowed it
+        # and every recall run failed in about a second with "Input must be provided".
+        self.assertEqual(command[:3], ["claude", "-p", "{prompt}"])
         self.assertIn("json", command)
-        self.assertIn("--allowedTools", command)
-        self.assertEqual(command[command.index("--allowedTools") + 1], "Read Grep Glob")
-        self.assertEqual(command[-1], "{prompt}")
+        tools_at = command.index("--allowedTools")
+        self.assertGreater(tools_at, command.index("{prompt}"))
+        self.assertEqual(command[tools_at + 1], "Read,Grep,Glob")
         text = EXAMPLE.read_text()
         self.assertIn('agent_command = ["codex", "exec", "--sandbox", "read-only", "{prompt}"]', text)
 

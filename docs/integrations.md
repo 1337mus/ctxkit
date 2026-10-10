@@ -97,7 +97,7 @@ The pull convention belongs in whichever file your agent reads at the start of a
 
 ```toml
 # Claude Code, with a read-only tool list. --output-format json exposes usage, so tokens are recorded.
-agent_command = ["claude", "-p", "--output-format", "json", "--model", "sonnet", "--allowedTools", "Read Grep Glob", "{prompt}"]
+agent_command = ["claude", "-p", "{prompt}", "--output-format", "json", "--model", "sonnet", "--allowedTools", "Read,Grep,Glob"]
 
 # Codex, in its read-only sandbox. Token usage is read from a "tokens used" line when present.
 # agent_command = ["codex", "exec", "--sandbox", "read-only", "{prompt}"]

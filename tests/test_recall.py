@@ -412,3 +412,29 @@ class ReportTest(RecallCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SpecificFactsTest(unittest.TestCase):
+    def test_vocabulary_identifiers_and_repeats_are_not_sampled(self):
+        """Regression: a token matching the identifier pattern in many files (a model
+        name, a rating) was sampled as a recall fact, and one identifier filled a third
+        of a real set. Widespread identifiers are dropped; each identifier appears once."""
+        import tempfile, pathlib
+        from ctxkit.config import load_config
+        from ctxkit.corpus import Corpus
+        from ctxkit import recall
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "README.md").write_text("index\n")
+            for i in range(5):
+                (root / f"t{i}.md").write_text(f"Updated: 2026-01-01\nUses MODEL-5 everywhere.\n")
+            (root / "a.md").write_text("Updated: 2026-01-01\nCheckout timeout fixed in SHOP-42.\nAgain SHOP-42 here.\n")
+            cfg_path = root / "c.toml"
+            cfg_path.write_text(f'root = "{root}"\nstate_dir = "{root}/state"\n')
+            cfg = load_config(str(cfg_path))
+            corpus = Corpus(cfg)
+            facts = list(recall.iter_facts(corpus))
+            kept = recall.specific_facts(corpus, facts)
+            ids = [f.identifier for f in kept]
+            self.assertNotIn("MODEL-5", ids)
+            self.assertEqual(ids.count("SHOP-42"), 1)
