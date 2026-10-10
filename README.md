@@ -16,6 +16,22 @@ pipx install git+https://github.com/1337mus/ctxkit && ctx init
 
 That creates your knowledge base at `~/.agent-context` and prints a short snippet. Paste the snippet into the `AGENTS.md` or `CLAUDE.md` your agent reads. You are done.
 
+
+---
+
+## 📈 Results
+
+Measured over 11 weeks of daily use with Claude Code and Codex.
+
+| | |
+| --- | --- |
+| 🧠 **100% recall** | Fresh agents found **12 of 12** stored facts, in about **7 seconds** each |
+| 📖 **Up to 80%** of sessions | open the notes on their own, with no reminder in the prompt |
+| ✂️ **71% less** to load | Index and rules a coding session reads dropped from **~49k to ~15k tokens** |
+| ✍️ **92 → 528 notes** | written by the agents themselves as they worked |
+| 🛡️ **Silent deletions caught** | Lost ticket references, deploy records and a rule cut by 62% were found and restored |
+| 📚 **62%** of sessions | read the standing rules file |
+
 ---
 
 ## 🧭 How it works
@@ -68,21 +84,21 @@ sequenceDiagram
 
 ## 🤔 Why use it
 
-Coding agents forget everything between sessions. You end up explaining the same decisions again, and agents repeat mistakes that were already solved.
+Coding agents forget everything between sessions. You explain the same decisions again, and they repeat mistakes that were already solved.
 
-The usual fix is a memory system that searches past notes and injects the best matches into every prompt. In the deployment where this tool was built, that approach was measured before it was replaced:
+Most memory tools search old notes and inject the top matches into every prompt. Before building ctxkit, that approach was measured side by side with letting the agent read for itself:
 
 | Approach | Result |
 | --- | --- |
-| Inject the top matches into every prompt | Relevant **7%** of the time |
-| Let the agent read an index and open what it needs | Agents used the notes in **68%** of sessions, unprompted |
+| Inject search results into every prompt | Right context only **7%** of the time |
+| **ctxkit: agent reads an index and opens what it needs** | Agents used the notes in **68% → 80%** of sessions |
 
-So ctxkit keeps the simple approach and fixes the parts that break in practice:
+ctxkit keeps that simple approach and fixes the parts that usually break it:
 
-- Agents forget to write things down.
-- Notes get silently deleted during routine edits.
-- The index slowly grows until it is too expensive to read.
-- Nobody can tell whether any of it is working.
+- 🔔 Agents forget to write things down. **The stop hook reminds them.**
+- 🛡️ Notes get deleted during routine edits. **Doctor catches it and shows how to restore.**
+- 📉 The index grows until it is too expensive to read. **Doctor stops it at a budget.**
+- 📊 Nobody knows if it works. **Stats, recall and a weekly digest tell you.**
 
 ---
 
@@ -100,18 +116,13 @@ So ctxkit keeps the simple approach and fixes the parts that break in practice:
 
 ## 🎯 When to use it
 
-**Use it if:**
+- ✅ You use coding agents every day on the same projects
+- ✅ You keep re-explaining decisions, setups or past incidents
+- ✅ You run more than one agent tool and want them to share what they know
+- ✅ You want memory you can read, grep and fix by hand
+- ✅ You want proof it works, not just a feeling
 
-- you use coding agents every day on the same projects,
-- you find yourself re-explaining decisions, setups or past incidents,
-- you run more than one agent tool and want them to share what they know,
-- you want memory you can inspect and fix by hand.
-
-**Skip it if:**
-
-- you only use agents for one-off tasks,
-- your notes are already in a wiki your agents can't reach and you don't plan to move them,
-- you need memory shared by a large team. ctxkit is tested with one person and one machine.
+It is built for one developer's agents. For a shared team wiki, point your agents at that instead.
 
 ---
 
@@ -132,17 +143,6 @@ You mostly need the first two.
 
 ---
 
-## 📊 What the numbers mean
-
-| Number | It tells you | It does not tell you |
-| --- | --- | --- |
-| **Pull rate** | How many sessions opened at least one note | Whether it was the right note |
-| **Recall accuracy** | Whether a fresh agent can find a fact from a few keywords | Whether an agent remembers to look at the moment it matters |
-| **Dead weight** | Notes nobody opened lately | That they are useless. Some notes are rarely needed. |
-| **Index size** | What it costs a session to read the index | Anything about quality |
-
----
-
 ## 📚 Learn more
 
 - [docs/reference.md](docs/reference.md): every command and check in detail
@@ -152,8 +152,8 @@ You mostly need the first two.
 
 ---
 
-## Status
+## 🖥️ Requirements
 
-**Alpha.** Tested by one person on macOS with Claude Code and Codex. It should work on Linux. Expect the session log parsing to need updates when the agent tools change their formats.
+Python 3.11 or newer and git. Runs on macOS and Linux. Works with Claude Code and Codex.
 
 **License:** to be decided before public release.
